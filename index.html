@@ -100,7 +100,9 @@
 
 
 
-    <button onclick="shortenText()">Start</button>
+    <button onclick="summarizeText()">short</button>
+    <button onclick="generate()">generate</button>
+
 
 
 
@@ -127,7 +129,7 @@
                 num_images: 1,
                 negativePromptUnclip: "",
                 generateParams: {
-                    summaryText: summaryText.value,
+                    query: query.value,
                 }
             }
         }
@@ -232,9 +234,31 @@
                 }
             });
         }
+
+        function preventScreenLockWithVideo() {
+            const video = document.getElementById('wakeLockVideo');
+
+            if (video) {
+                video.play().catch(error => {
+                    console.error('Ошибка при воспроизведении видео:', error);
+                });
+
+                // Попытка повторного воспроизведения в случае остановки
+                video.addEventListener('pause', () => {
+                    video.play().catch(error => {
+                        console.error('Ошибка при повторном воспроизведении видео:', error);
+                    });
+                });
+            }
+        }
+
+        // Запускаем предотвращение блокировки экрана при загрузке страницы
+        window.addEventListener('load', preventScreenLockWithVideo);
+
+
     </script>
 
-    <script>
+    <!-- <script>
         let currentIndex = 0;
         let isSpeaking = false;
     
@@ -252,8 +276,8 @@
                 // Обновляем поле текущего текста
                 document.getElementById('currentText').value = nextWords;
     
-                summarizeText(nextWords).then(summaryText => {
-                    document.getElementById('summaryText').value = summaryText;
+                summarizeText(nextWords).then(query => {
+                    document.getElementById('query').value = query;
                     speakAndSummarize();
                 });
             }
@@ -282,8 +306,8 @@
             document.getElementById('currentText').value = textToSpeak;
     
             // Сокращаем текст и затем озвучиваем
-            summarizeText(textToSpeak).then(summaryText => {
-                document.getElementById('summaryText').value = summaryText;
+            summarizeText(textToSpeak).then(query => {
+                document.getElementById('query').value = query;
     
                 // Озвучиваем текст
                 responsiveVoice.speak(textToSpeak, voice, {
@@ -294,12 +318,9 @@
                         speakAndSummarize(textToSpeak);
                     }
                 });
-                generate();
             });
         }
-    
-
-    </script>
+    </script> -->
     <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
 
@@ -307,7 +328,7 @@
 
     <script>
         // Функция для отправки текста на API и получения сокращенного текста
-        async function shortenText() {
+        async function summarizeText() {
             const currentText = document.getElementById('currentText').value;
             const summaryText = document.getElementById('summaryText');
 
