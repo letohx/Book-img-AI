@@ -5,74 +5,314 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cohere Summarizer</title>
     <style>
-        body {
+       body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .chat-container {
-            width: 400px;
-            background-color: #fff;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
         }
 
-        .chat-box {
-            border: 1px solid #ccc;
-            height: 300px;
-            overflow-y: scroll;
-            padding: 10px;
+        textarea {
+            width: 100%;
             margin-bottom: 20px;
         }
 
-        .input-box {
-            display: flex;
+        label {
+            display: block;
+            margin-top: 10px;
         }
 
-        .input-box input {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .input-box button {
-            width: 20%;
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 5px;
             cursor: pointer;
         }
 
-        .input-box button:hover {
+        button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
 <body>
+
+
+
+
+   <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <h1>Book visualizer AI</h1>
+
+    <!-- Основной текст -->
+    <textarea id="textToSpeak" rows="10" placeholder="Введите текст для озвучки...">
+       
+    </textarea><br>
+
     <!-- Поле для отображения текущих слов с переносом текста -->
     <textarea id="currentText" rows="5"></textarea><br>
 
+    <!-- Инпут для выбора количества слов -->
+    <label for="wordCount">Number of words at a time:</label>
+    <input type="number" id="wordCount" min="1" value="50"><br><br>
+
+    <!-- Выпадающий список для выбора голоса -->
+    <label for="voiceselection">Выберите голос:</label>
+    <select id="voiceselection" class="input input--dropdown js--animations">
+        <option value="Russian Female">Russian Female</option>
+        <option value="Russian Male">Russian Male</option>
+        <option value="UK English Female">UK English Female</option>
+        <option value="UK English Male">UK English Male</option>
+        <option value="US English Female">US English Female</option>
+        <option value="US English Male">US English Male</option>
+        <option value="Polish Male">Polish Male</option>
+        <option value="Polish Female">Polish Female</option>
+        <option value="Romanian Female">Romanian Female</option>
+        <option value="Slovak Female">Slovak Female</option>
+        <option value="Ukrainian Female">Ukrainian Female</option>
+        <option value="Serbo-Croatian Male">Serbo-Croatian Male</option>
+        <option value="Bosnian Male">Bosnian Male</option>
+    </select><br><br>
+
+    <div class="container">
+        <div class="input-group">
+            <label>Width</label>
+            <input id="width" type="text" value="1920" size="5">
+        </div>
+        <div class="input-group">
+            <label>Height</label>
+            <input id="height" type="text" value="1080" size="5">
+        </div>
+        <div class="input-group">
+            <label>Style</label>
+            <select id="style"></select>
+        </div>
+        <button onclick="autoSetSize()">Auto size image</button>
+    </div>
+
+    <button onclick="startSpeaking()">Start</button>
+
     <!-- Поле для отображения сокращенного текста -->
-    <textarea id="summary" rows="3" readonly></textarea><br>
+    <textarea id="summaryText" rows="3" readonly></textarea><br>
+
+    <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Full screen">
+   <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+
+
 
     <button onclick="shortenText()">Start</button>
 
+
+
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
     <script>
+        const key = "CB877DFF3660DE7C80599E533C090123"
+        const secret = "4A329B2763F032D01B680EF8C1E3F23D"
+        let prd = null;
+        let uuid = '';
+
+        function headers() {
+            return {
+                'X-Key': 'Key ' + key,
+                'X-Secret': 'Secret ' + secret,
+            }
+        }
+
+        function params() {
+            return {
+                type: "GENERATE",
+                style: style.value,
+                width: width.value,
+                height: height.value,
+                num_images: 1,
+                negativePromptUnclip: "",
+                generateParams: {
+                    summaryText: summaryText.value,
+                }
+            }
+        }
+
+        async function generate() {
+            let model_id = 0;
+            {
+                let res = await fetch('https://api-key.fusionbrain.ai/key/api/v1/models', {
+                    method: 'GET',
+                    headers: headers(),
+                });
+                res = await res.json();
+                model_id = res[0].id;
+            }
+
+            let formData = new FormData();
+            formData.append('model_id', model_id);
+            formData.append('params', new Blob([JSON.stringify(params())], { type: "application/json" }));
+
+            let res = await fetch('https://api-key.fusionbrain.ai/key/api/v1/text2image/run', {
+                method: 'POST',
+                headers: headers(),
+                body: formData,
+            });
+            let json = await res.json();
+            console.log(json);
+
+            uuid = json.uuid;
+            if (json.uuid) prd = setInterval(check, 3000);
+
+        }
+
+        async function check() {
+            let res = await fetch('https://api-key.fusionbrain.ai/key/api/v1/text2image/status/' + uuid, {
+                method: 'GET',
+                headers: headers(),
+            });
+            let json = await res.json();
+            console.log(json);
+
+            switch (json.status) {
+                case 'INITIAL':
+                case 'PROCESSING':
+                    break;
+
+                case 'DONE':
+                    document.getElementById('img').src = 'data:image/jpeg;charset=utf-8;base64,' + json.images[0];
+                    clearInterval(prd);
+                    generate(); // Запуск нового запроса на генерацию после отображения картинки
+                    break;
+
+                case 'FAIL':
+                    clearInterval(prd);
+                    break;
+            }
+        }
+
+        function autoSetSize() {
+            let maxWidth = 1920;
+            let maxHeight = 1920;
+            let screenWidth = screen.width;
+            let screenHeight = screen.height;
+
+            let ratio = Math.min(maxWidth / screenWidth, maxHeight / screenHeight, 1);
+
+            let newWidth = Math.floor(screenWidth * ratio);
+            let newHeight = Math.floor(screenHeight * ratio);
+
+            document.getElementById('width').value = newWidth;
+            document.getElementById('height').value = newHeight;
+        }
+
+        window.onload = async () => {
+            let res = await fetch('https://cdn.fusionbrain.ai/static/styles/web');
+            res = await res.json();
+            for (let style of res) {
+                document.getElementById('style').innerHTML += `<option value="${style.name}">${style.name}</option>`;
+            }
+
+            const imgElement = document.getElementById('img');
+            imgElement.addEventListener('click', function () {
+                if (!document.fullscreenElement) {
+                    if (this.requestFullscreen) {
+                        this.requestFullscreen();
+                    } else if (this.mozRequestFullScreen) {
+                        this.mozRequestFullScreen();
+                    } else if (this.webkitRequestFullscreen) {
+                        this.webkitRequestFullscreen();
+                    } else if (this.msRequestFullscreen) {
+                        this.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            });
+        }
+    </script>
+
+    <script>
+        let currentIndex = 0;
+        let isSpeaking = false;
+    
+        // Функция для начала автоматической озвучки и сокращения
+        function startSpeaking() {
+            if (!isSpeaking) {
+                isSpeaking = true;
+                // Сразу сокращаем первый кусок текста и озвучиваем
+                const text = document.getElementById('textToSpeak').value;
+                const wordCount = parseInt(document.getElementById('wordCount').value);
+    
+                const words = text.split(/\s+/);
+                const nextWords = words.slice(currentIndex, currentIndex + wordCount).join(' ');
+    
+                // Обновляем поле текущего текста
+                document.getElementById('currentText').value = nextWords;
+    
+                summarizeText(nextWords).then(summaryText => {
+                    document.getElementById('summaryText').value = summaryText;
+                    speakAndSummarize();
+                });
+            }
+        }
+    
+        // Функция для озвучивания и сокращения текста
+        async function speakAndSummarize() {
+            const text = document.getElementById('textToSpeak').value;
+            const voice = document.getElementById('voiceselection').value;
+            const wordCount = parseInt(document.getElementById('wordCount').value);
+    
+            // Разделяем текст на слова
+            const words = text.split(/\s+/);
+    
+            if (currentIndex >= words.length) {
+                alert("Конец текста.");
+                isSpeaking = false; // Останавливаем процесс
+                return;
+            }
+    
+            // Берем следующие несколько слов
+            const nextWords = words.slice(currentIndex, currentIndex + wordCount);
+            const textToSpeak = nextWords.join(' ');
+    
+            // Обновляем поле текущего текста
+            document.getElementById('currentText').value = textToSpeak;
+    
+            // Сокращаем текст и затем озвучиваем
+            summarizeText(textToSpeak).then(summaryText => {
+                document.getElementById('summaryText').value = summaryText;
+    
+                // Озвучиваем текст
+                responsiveVoice.speak(textToSpeak, voice, {
+                    onend: () => {
+                        // Увеличиваем индекс на количество прочитанных слов
+                        currentIndex += wordCount;
+                        // Переход к следующему отрывку текста
+                        speakAndSummarize(textToSpeak);
+                    }
+                });
+                generate();
+            });
+        }
+    
+
+    </script>
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+
+
+
+    <script>
+        // Функция для отправки текста на API и получения сокращенного текста
         async function shortenText() {
             const currentText = document.getElementById('currentText').value;
-            const summary = document.getElementById('summary');
+            const summaryText = document.getElementById('summaryText');
 
   
-            summary.value = '';
+            summaryText.value = '';
 
             try {
                 const response = await fetch('/.netlify/functions/summarize', {
@@ -84,10 +324,10 @@
                 });
 
                 const data = await response.json();
-                summary.innerHTML = data.summary;
+                summaryText.innerHTML = data.summary;
             } catch (error) {
                 console.error('Error:', error);
-                summary.innerHTML = `Error processing your request. Please try again later.`;
+                summaryText.innerHTML = `Error processing your request. Please try again later.`;
             }
 
         }
