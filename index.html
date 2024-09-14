@@ -123,6 +123,7 @@
         }
 
         function params() {
+            summaryText = document.getElementById('summaryText').value;
             return {
                 type: "GENERATE",
                 style: style.value,
@@ -131,7 +132,7 @@
                 num_images: 1,
                 negativePromptUnclip: "",
                 generateParams: {
-                    query: query.value,
+                    summaryText: summaryText,
                 }
             }
         }
