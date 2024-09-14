@@ -58,31 +58,21 @@
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <h2>Cohere Summarizer</h2>
-        <div class="chat-box" id="chatBox">
-            <p><strong>To:</strong> Hello! Type some text to summarize.</p>
-        </div>
+    <!-- Поле для отображения текущих слов с переносом текста -->
+    <textarea id="currentText" rows="5"></textarea><br>
 
-        <div class="input-box">
-            <input type="text" id="userInput" placeholder="Type a message...">
-            <button onclick="shortenText()">Send</button>
-        </div>
-    </div>
+    <!-- Поле для отображения сокращенного текста -->
+    <textarea id="summary" rows="3" readonly></textarea><br>
+
     <button onclick="shortenText()">Start</button>
 
     <script>
         async function shortenText() {
-            const chatBox = document.getElementById('chatBox');
-            const userInput = document.getElementById('userInput').value;
+            const currentText = document.getElementById('currentText').value;
+            const summary = document.getElementById('summary');
 
-            if (!userInput) {
-                alert('Please enter a message.');
-                return;
-            }
-
-            chatBox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
-            document.getElementById('userInput').value = '';
+  
+            summary.value = '';
 
             try {
                 const response = await fetch('/.netlify/functions/summarize', {
@@ -90,17 +80,16 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ text: userInput })
+                    body: JSON.stringify({ text: currentText })
                 });
 
                 const data = await response.json();
-                chatBox.innerHTML += `<p><strong>Bot:</strong> ${data.summary}</p>`;
+                summary.innerHTML = data.summary;
             } catch (error) {
                 console.error('Error:', error);
-                chatBox.innerHTML += `<p><strong>Bot:</strong> Error processing your request. Please try again later.</p>`;
+                summary.innerHTML = `Error processing your request. Please try again later.`;
             }
 
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
 </body>
