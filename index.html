@@ -59,7 +59,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    query: query.value,
+                    summaryText: summaryText.value,
                 }
             }
         }
@@ -268,10 +268,6 @@
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
     <div class="container">
         <div class="input-group">
-            <label>Query</label>
-            <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
-        </div>
-        <div class="input-group">
             <label>Negative</label>
             <input id="negative" type="text" value="">
         </div>
@@ -290,7 +286,6 @@
         <button onclick="autoSetSize()">Auto Size</button>
         <button class="btn-generate" onclick="generate()">Start generate</button>
     </div>
-    <img src="https://www.securitylab.ru/upload/iblock/310/czkfrlquywer09wngk1syjc19txxk652.jpeg" id="img" title="Full screen">
 
     <video id="wakeLockVideo" loop playsinline muted style="display: none;">
         <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
