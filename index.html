@@ -92,6 +92,7 @@
                 }
 
                 prd = setInterval(check, 3000);
+                generate();
             } catch (error) {
                 console.error('Error generating image:', error);
             }
@@ -137,7 +138,6 @@
 
                 const data = await response.json();
                 summaryText.innerText = data.summary;
-                generate(); // Запуск генерации изображения после сокращения текста
             } catch (error) {
                 summaryText.innerText = `Error processing your request.`;
             }
@@ -170,6 +170,7 @@
         function startCycle() {
             currentIndex = 0; // Сбрасываем индекс при новом запуске
             speakNext(); // Начинаем озвучивание и сокращение
+            generate();
         }
 
         window.onload = async () => {
