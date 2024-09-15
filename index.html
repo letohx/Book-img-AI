@@ -51,7 +51,6 @@
         }
 
         function params() {
-            const summaryText = document.getElementById('summaryText');
             return {
                 type: "GENERATE",
                 style: style.value,
@@ -60,7 +59,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    summaryText: summaryText.innerHTML,
+                    query: query.value,
                 }
             }
         }
@@ -250,8 +249,8 @@
 
     <!-- Поле для отображения сокращенного текста -->
     <div class="input-group">
-        <label>summaryText</label>
-        <input id="summaryText" type="text" value="контейнеровоз терпит крушение в шторм">
+        <label>summarizeText</label>
+        <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
     </div>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Full screen">
