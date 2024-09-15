@@ -59,7 +59,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    summaryText: summaryText.value,
+                    query: query.value,
                 }
             }
         }
@@ -248,10 +248,13 @@
     <button onclick="startSpeaking()">startSpeaking</button>
 
     <!-- Поле для отображения сокращенного текста -->
-    <div class="input-group">
-        <label>summaryText</label>
-        <input id="summaryText" type="text" value="контейнеровоз терпит крушение в шторм">
-    </div>
+    <div id="summaryText">
+
+    </div><br>
+            <div class="input-group">
+            <label>Query</label>
+            <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
+        </div>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Full screen">
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -316,10 +319,10 @@
                 });
 
                 const data = await response.json();
-                summaryText.value = data.summary;
+                summaryText.innerHTML = data.summary;
             } catch (error) {
                 console.error('Error:', error);
-                summaryText.value = `Error processing your request. Please try again later.`;
+                summaryText.innerHTML = `Error processing your request. Please try again later.`;
             }
 
         }
