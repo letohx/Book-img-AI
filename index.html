@@ -60,43 +60,61 @@
         }
 
         async function generate() {
-            let model_id = 0;
-            {
+            try {
+                let model_id = 0;
                 let res = await fetch('https://api-key.fusionbrain.ai/key/api/v1/models', {
                     method: 'GET',
                     headers: headers(),
                 });
-                res = await res.json();
-                model_id = res[0].id;
+                const models = await res.json();
+                model_id = models[0]?.id;
+
+                if (!model_id) {
+                    console.error('Model ID not found');
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append('model_id', model_id);
+                formData.append('params', new Blob([JSON.stringify(params())], { type: "application/json" }));
+
+                let imageResponse = await fetch('https://api-key.fusionbrain.ai/key/api/v1/text2image/run', {
+                    method: 'POST',
+                    headers: headers(),
+                    body: formData,
+                });
+                let imageResult = await imageResponse.json();
+                uuid = imageResult.uuid;
+
+                if (!uuid) {
+                    console.error('UUID not generated');
+                    return;
+                }
+
+                prd = setInterval(check, 3000);
+                document.querySelector(".btn-generate").textContent = 'Generating...';
+            } catch (error) {
+                console.error('Error generating image:', error);
             }
-
-            let formData = new FormData();
-            formData.append('model_id', model_id);
-            formData.append('params', new Blob([JSON.stringify(params())], { type: "application/json" }));
-
-            let res = await fetch('https://api-key.fusionbrain.ai/key/api/v1/text2image/run', {
-                method: 'POST',
-                headers: headers(),
-                body: formData,
-            });
-            let json = await res.json();
-            uuid = json.uuid;
-
-            if (json.uuid) prd = setInterval(check, 3000);
-            document.querySelector(".btn-generate").textContent = 'Generating...';
         }
 
         async function check() {
-            let res = await fetch('https://api-key.fusionbrain.ai/key/api/v1/text2image/status/' + uuid, {
-                method: 'GET',
-                headers: headers(),
-            });
-            let json = await res.json();
+            try {
+                let res = await fetch('https://api-key.fusionbrain.ai/key/api/v1/text2image/status/' + uuid, {
+                    method: 'GET',
+                    headers: headers(),
+                });
+                let json = await res.json();
 
-            if (json.status === 'DONE') {
-                document.getElementById('img').src = 'data:image/jpeg;charset=utf-8;base64,' + json.images[0];
-                clearInterval(prd);
-                generate(); // Start next image generation
+                if (json.status === 'DONE') {
+                    document.getElementById('img').src = 'data:image/jpeg;charset=utf-8;base64,' + json.images[0];
+                    clearInterval(prd);
+                } else if (json.status === 'ERROR') {
+                    console.error('Error in image generation');
+                    clearInterval(prd);
+                }
+            } catch (error) {
+                console.error('Error checking image status:', error);
             }
         }
 
@@ -107,8 +125,7 @@
             document.getElementById('height').value = screenHeight;
         }
 
-        async function summarizeText() {
-            const currentText = document.getElementById('currentText').value;
+        async function summarizeText(text) {
             const summaryText = document.getElementById('summaryText');
             summaryText.innerText = '';
 
@@ -116,11 +133,12 @@
                 const response = await fetch('/.netlify/functions/summarize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: currentText })
+                    body: JSON.stringify({ text })
                 });
 
                 const data = await response.json();
-                summaryText.innerText = data.summary; 
+                summaryText.innerText = data.summary;
+                generate(); // Запуск генерации изображения после сокращения текста
             } catch (error) {
                 summaryText.innerText = `Error processing your request.`;
             }
@@ -140,25 +158,26 @@
             const nextWords = words.slice(currentIndex, currentIndex + wordCount).join(' ');
             document.getElementById('currentText').value = nextWords;
 
+            summarizeText(nextWords); // Сокращаем текст перед озвучиванием
+
             responsiveVoice.speak(nextWords, voice, {
                 onend: () => {
                     currentIndex += wordCount;
-                    summarizeText(); // Call text summarization after speaking
+                    speakNext(); // Продолжаем озвучивание следующей порции
                 }
             });
         }
 
         function startCycle() {
-            speakNext(); // Speak first batch of words
-            summarizeText(); // Summarize the text
-            generate(); // Start generating images
+            currentIndex = 0; // Сбрасываем индекс при новом запуске
+            speakNext(); // Начинаем озвучивание и сокращение
         }
     </script>
 </head>
 <body>
     <h1>Text Summarization, TTS, and Image Generation</h1>
     <textarea id="textToSpeak" rows="10" placeholder="Enter text here..."></textarea><br>
-    <textarea id="currentText" rows="5"></textarea><br>
+    <textarea id="currentText" rows="5" readonly></textarea><br>
 
     <label for="wordCount">Number of words at a time:</label>
     <input type="number" id="wordCount" min="1" value="50"><br>
@@ -190,6 +209,5 @@
     </div>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Click for fullscreen">
-    <button class="btn-generate" onclick="generate()">Generate Image</button>
 </body>
 </html>
