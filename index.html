@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Summarization, TTS, and Image Generation</title>
+    <title>Book img AI</title>
     <style>
        body {
             font-family: Arial, sans-serif;
@@ -92,7 +92,6 @@
                 }
 
                 prd = setInterval(check, 3000);
-                document.querySelector(".btn-generate").textContent = 'Generating...';
             } catch (error) {
                 console.error('Error generating image:', error);
             }
@@ -172,10 +171,43 @@
             currentIndex = 0; // Сбрасываем индекс при новом запуске
             speakNext(); // Начинаем озвучивание и сокращение
         }
+
+        window.onload = async () => {
+            let res = await fetch('https://cdn.fusionbrain.ai/static/styles/web');
+            res = await res.json();
+            for (let style of res) {
+                document.getElementById('style').innerHTML += `<option value="${style.name}">${style.name}</option>`;
+            }
+
+            const imgElement = document.getElementById('img');
+            imgElement.addEventListener('click', function () {
+                if (!document.fullscreenElement) {
+                    if (this.requestFullscreen) {
+                        this.requestFullscreen();
+                    } else if (this.mozRequestFullScreen) {
+                        this.mozRequestFullScreen();
+                    } else if (this.webkitRequestFullscreen) {
+                        this.webkitRequestFullscreen();
+                    } else if (this.msRequestFullscreen) {
+                        this.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            });
+        }
     </script>
 </head>
 <body>
-    <h1>Text Summarization, TTS, and Image Generation</h1>
+    <h1>Book image AI</h1>
     <textarea id="textToSpeak" rows="10" placeholder="Enter text here..."></textarea><br>
     <textarea id="currentText" rows="5" readonly></textarea><br>
 
@@ -186,11 +218,18 @@
     <select id="voiceselection">
         <option value="Russian Female">Russian Female</option>
         <option value="Russian Male">Russian Male</option>
-        <!-- Add more voices here -->
+        <option value="UK English Female">UK English Female</option>
+        <option value="UK English Male">UK English Male</option>
+        <option value="US English Female">US English Female</option>
+        <option value="US English Male">US English Male</option>
+        <option value="Polish Male">Polish Male</option>
+        <option value="Polish Female">Polish Female</option>
+        <option value="Romanian Female">Romanian Female</option>
+        <option value="Slovak Female">Slovak Female</option>
+        <option value="Ukrainian Female">Ukrainian Female</option>
+        <option value="Serbo-Croatian Male">Serbo-Croatian Male</option>
+        <option value="Bosnian Male">Bosnian Male</option>
     </select><br>
-
-    <button onclick="startCycle()">Start</button>
-    <div id="summaryText"></div><br>
 
     <div class="container">
         <div class="input-group">
@@ -201,12 +240,16 @@
             <label>Height</label>
             <input id="height" type="text" value="1080" size="5">
         </div>
+        <button onclick="autoSetSize()">Auto size image</button>
         <div class="input-group">
             <label>Style</label>
             <select id="style"></select>
         </div>
-        <button onclick="autoSetSize()">Auto size image</button>
     </div>
+
+    <button onclick="startCycle()">Start</button>
+
+    <div id="summaryText"></div><br>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Click for fullscreen">
 </body>
