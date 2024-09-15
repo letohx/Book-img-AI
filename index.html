@@ -51,6 +51,7 @@
         }
 
         function params() {
+            const summaryText = document.getElementById('summaryText');
             return {
                 type: "GENERATE",
                 style: style.value,
@@ -59,7 +60,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    summaryText: summaryText.value,
+                    summaryText: summaryText.innerHTML,
                 }
             }
         }
@@ -316,10 +317,10 @@
                 });
 
                 const data = await response.json();
-                summaryText.value = data.summary;
+                summaryText.innerHTML = data.summary;
             } catch (error) {
                 console.error('Error:', error);
-                summaryText.value = `Error processing your request. Please try again later.`;
+                summaryText.innerHTML = `Error processing your request. Please try again later.`;
             }
 
         }
