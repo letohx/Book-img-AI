@@ -228,11 +228,6 @@
         }
 
         window.onload = async () => {
-            let res = await fetch('https://cdn.fusionbrain.ai/static/styles/web');
-            res = await res.json();
-            for (let style of res) {
-                document.getElementById('style').innerHTML += `<option value="${style.name}">${style.name}</option>`;
-            }
 
             const imgElement = document.getElementById('img');
             imgElement.addEventListener('click', function () {
@@ -583,7 +578,26 @@
             <button onclick="autoSetSize()">Auto size image</button>
             <div class="input-group">
                 <label>Style image</label>
-                <select id="style"></select>
+                <select id="style">
+                    <option value="DEFAULT">DEFAULT</option>
+                    <option value="MALEVICH">MALEVICH</option>
+                    <option value="PIXEL_ART">PIXEL_ART</option>
+                    <option value="CYBERPUNK">CYBERPUNK</option>
+                    <option value="CARTOON">CARTOON</option>
+                    <option value="DIGITALPAINTING">DIGITALPAINTING</option>
+                    <option value="OILPAINTING">OILPAINTING</option>
+                    <option value="CLASSICISM">CLASSICISM</option>
+                    <option value="PICASSO">PICASSO</option>
+                    <option value="PORTRAITPHOTO">PORTRAITPHOTO</option>
+                    <option value="PENCILDRAWING">PENCILDRAWING</option>
+                    <option value="KHOKHLOMA">KHOKHLOMA</option>
+                    <option value="STUDIOPHOTO">STUDIOPHOTO</option>
+                    <option value="UHD">UHD</option>
+                    <option value="AIVAZOVSKY">AIVAZOVSKY</option>
+                    <option value="ANIME">ANIME</option>
+                    <option value="RENDER">RENDER</option>
+                    <option value="KANDINSKY">KANDINSKY</option>
+                </select>
             </div>
 
             <button onclick="startCycle()">Start</button>
