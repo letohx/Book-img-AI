@@ -42,7 +42,6 @@
         const secret = "4A329B2763F032D01B680EF8C1E3F23D"
         let prd = null;
         let uuid = '';
-        const summaryText = document.getElementById('summaryText');
 
         function headers() {
             return {
@@ -306,6 +305,8 @@
         // Функция для отправки текста на API и получения сокращенного текста
         async function summarizeText() {
             const currentText = document.getElementById('currentText').value;
+            const summaryText = document.getElementById('summaryText');
+
   
             summaryText.value = '';
 
