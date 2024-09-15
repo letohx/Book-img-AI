@@ -92,7 +92,6 @@
                 }
 
                 prd = setInterval(check, 3000);
-                generate();
             } catch (error) {
                 console.error('Error generating image:', error);
             }
@@ -114,6 +113,7 @@
                     console.error('Error in image generation');
                     clearInterval(prd);
                 }
+                generate();
             } catch (error) {
                 console.error('Error checking image status:', error);
             }
