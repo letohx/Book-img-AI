@@ -59,7 +59,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    summaryText: summaryText.value,
+                    query: query.value,
                 }
             }
         }
@@ -267,6 +267,10 @@
 
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
     <div class="container">
+        <div class="input-group">
+            <label>Query</label>
+            <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
+        </div>
         <div class="input-group">
             <label>Negative</label>
             <input id="negative" type="text" value="">
