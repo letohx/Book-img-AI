@@ -59,7 +59,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    query: query.value,
+                    summaryText: summaryText.value,
                 }
             }
         }
@@ -248,9 +248,10 @@
     <button onclick="startSpeaking()">startSpeaking</button>
 
     <!-- Поле для отображения сокращенного текста -->
-    <div id="summaryText">
-
-    </div><br>
+    <div class="input-group">
+        <label>summaryText</label>
+        <input id="summaryText" type="text" value="контейнеровоз терпит крушение в шторм">
+    </div>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Full screen">
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -267,10 +268,6 @@
 
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
     <div class="container">
-        <div class="input-group">
-            <label>Query</label>
-            <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
-        </div>
         <div class="input-group">
             <label>Negative</label>
             <input id="negative" type="text" value="">
