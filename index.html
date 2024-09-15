@@ -108,7 +108,6 @@
                 if (json.status === 'DONE') {
                     document.getElementById('img').src = 'data:image/jpeg;charset=utf-8;base64,' + json.images[0];
                     clearInterval(prd);
-                    generate();
                 } else if (json.status === 'ERROR') {
                     console.error('Error in image generation');
                     clearInterval(prd);
@@ -138,6 +137,7 @@
 
                 const data = await response.json();
                 summaryText.innerText = data.summary;
+                generate(); // Запуск генерации изображения после сокращения текста
             } catch (error) {
                 summaryText.innerText = `Error processing your request.`;
             }
@@ -170,7 +170,6 @@
         function startCycle() {
             currentIndex = 0; // Сбрасываем индекс при новом запуске
             speakNext(); // Начинаем озвучивание и сокращение
-            generate();
         }
 
         window.onload = async () => {
@@ -250,7 +249,7 @@
 
     <button onclick="startCycle()">Start</button>
 
-    <div id="summaryText">artificial intelligence</div><br>
+    <div id="summaryText"></div><br>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Click for fullscreen">
 </body>
