@@ -96,7 +96,6 @@
                 console.error('Error generating image:', error);
             }
         }
-        generate();
 
         async function check() {
             try {
@@ -109,11 +108,11 @@
                 if (json.status === 'DONE') {
                     document.getElementById('img').src = 'data:image/jpeg;charset=utf-8;base64,' + json.images[0];
                     clearInterval(prd);
+                    generate();
                 } else if (json.status === 'ERROR') {
                     console.error('Error in image generation');
                     clearInterval(prd);
                 }
-                generate();
             } catch (error) {
                 console.error('Error checking image status:', error);
             }
@@ -171,6 +170,7 @@
         function startCycle() {
             currentIndex = 0; // Сбрасываем индекс при новом запуске
             speakNext(); // Начинаем озвучивание и сокращение
+            generate();
         }
 
         window.onload = async () => {
@@ -250,7 +250,7 @@
 
     <button onclick="startCycle()">Start</button>
 
-    <div id="summaryText">AI</div><br>
+    <div id="summaryText"></div><br>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Click for fullscreen">
 </body>
