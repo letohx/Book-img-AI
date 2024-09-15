@@ -59,7 +59,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    query: query.value,
+                    summaryText: document.getElementById('summaryText').textContent,
                 }
             }
         }
@@ -252,10 +252,7 @@
 
     </div>
     <br>
-    <div class="input-group">
-        <label>Query</label>
-        <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
-    </div>
+
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Full screen">
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -308,7 +305,7 @@
             const summaryText = document.getElementById('summaryText');
 
   
-            summaryText.value = '';
+            summaryText.textContent = '';
 
             try {
                 const response = await fetch('/.netlify/functions/summarize', {
