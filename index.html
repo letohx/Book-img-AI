@@ -97,6 +97,7 @@
                 console.error('Error generating image:', error);
             }
         }
+        generate();
 
         async function check() {
             try {
@@ -170,7 +171,6 @@
         function startCycle() {
             currentIndex = 0; // Сбрасываем индекс при новом запуске
             speakNext(); // Начинаем озвучивание и сокращение
-            generate();
         }
 
         window.onload = async () => {
@@ -250,7 +250,7 @@
 
     <button onclick="startCycle()">Start</button>
 
-    <div id="summaryText"></div><br>
+    <div id="summaryText">AI</div><br>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Click for fullscreen">
 </body>
