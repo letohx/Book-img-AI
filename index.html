@@ -316,10 +316,10 @@
                 });
 
                 const data = await response.json();
-                summaryText.innerHTML = data.summary;
+                summaryText.value = data.summary;
             } catch (error) {
                 console.error('Error:', error);
-                summaryText.innerHTML = `Error processing your request. Please try again later.`;
+                summaryText.value = `Error processing your request. Please try again later.`;
             }
 
         }
