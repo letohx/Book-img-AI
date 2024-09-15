@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cohere Summarizer</title>
+    <title>Text Summarization, TTS, and Image Generation</title>
     <style>
        body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             padding: 20px;
         }
-
         textarea {
             width: 100%;
             margin-bottom: 20px;
         }
-
         label {
             display: block;
             margin-top: 10px;
         }
-
         button {
             margin-top: 10px;
             padding: 10px 20px;
@@ -29,25 +26,23 @@
             border: none;
             cursor: pointer;
         }
-
         button:hover {
             background-color: #45a049;
         }
     </style>
-
-
-    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
     <script>
-        const key = "CB877DFF3660DE7C80599E533C090123"
-        const secret = "4A329B2763F032D01B680EF8C1E3F23D"
+        const key = "CB877DFF3660DE7C80599E533C090123";
+        const secret = "4A329B2763F032D01B680EF8C1E3F23D";
         let prd = null;
         let uuid = '';
+        let currentIndex = 0;
 
         function headers() {
             return {
                 'X-Key': 'Key ' + key,
                 'X-Secret': 'Secret ' + secret,
-            }
+            };
         }
 
         function params() {
@@ -57,11 +52,11 @@
                 width: width.value,
                 height: height.value,
                 num_images: 1,
-                negativePromptUnclip: negative.value,
+                negativePromptUnclip: "",
                 generateParams: {
-                    query: query.value,
+                    query: document.getElementById('summaryText').innerText,
                 }
-            }
+            };
         }
 
         async function generate() {
@@ -85,13 +80,10 @@
                 body: formData,
             });
             let json = await res.json();
-            console.log(json);
-
             uuid = json.uuid;
-            if (json.uuid) prd = setInterval(check, 3000);
 
-            const btnGenerate = document.querySelector(".btn-generate");
-            btnGenerate.textContent = 'Generation ....';
+            if (json.uuid) prd = setInterval(check, 3000);
+            document.querySelector(".btn-generate").textContent = 'Generating...';
         }
 
         async function check() {
@@ -100,134 +92,86 @@
                 headers: headers(),
             });
             let json = await res.json();
-            console.log(json);
 
-            switch (json.status) {
-                case 'INITIAL':
-                case 'PROCESSING':
-                    break;
-
-                case 'DONE':
-                    document.getElementById('img').src = 'data:image/jpeg;charset=utf-8;base64,' + json.images[0];
-                    clearInterval(prd);
-                    generate(); // Запуск нового запроса на генерацию после отображения картинки
-                    break;
-
-                case 'FAIL':
-                    clearInterval(prd);
-                    break;
+            if (json.status === 'DONE') {
+                document.getElementById('img').src = 'data:image/jpeg;charset=utf-8;base64,' + json.images[0];
+                clearInterval(prd);
+                generate(); // Start next image generation
             }
         }
 
         function autoSetSize() {
-            let maxWidth = 1920;
-            let maxHeight = 1920;
             let screenWidth = screen.width;
             let screenHeight = screen.height;
-
-            let ratio = Math.min(maxWidth / screenWidth, maxHeight / screenHeight, 1);
-
-            let newWidth = Math.floor(screenWidth * ratio);
-            let newHeight = Math.floor(screenHeight * ratio);
-
-            document.getElementById('width').value = newWidth;
-            document.getElementById('height').value = newHeight;
+            document.getElementById('width').value = screenWidth;
+            document.getElementById('height').value = screenHeight;
         }
 
-        window.onload = async () => {
-            let res = await fetch('https://cdn.fusionbrain.ai/static/styles/web');
-            res = await res.json();
-            for (let style of res) {
-                document.getElementById('style').innerHTML += `<option value="${style.name}">${style.name}</option>`;
+        async function summarizeText() {
+            const currentText = document.getElementById('currentText').value;
+            const summaryText = document.getElementById('summaryText');
+            summaryText.innerText = '';
+
+            try {
+                const response = await fetch('/.netlify/functions/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: currentText })
+                });
+
+                const data = await response.json();
+                summaryText.innerText = data.summary; 
+            } catch (error) {
+                summaryText.innerText = `Error processing your request.`;
+            }
+        }
+
+        function speakNext() {
+            const text = document.getElementById('textToSpeak').value;
+            const voice = document.getElementById('voiceselection').value;
+            const wordCount = parseInt(document.getElementById('wordCount').value);
+            const words = text.split(/\s+/);
+
+            if (currentIndex >= words.length) {
+                alert("End of text.");
+                return;
             }
 
-            const imgElement = document.getElementById('img');
-            imgElement.addEventListener('click', function () {
-                if (!document.fullscreenElement) {
-                    if (this.requestFullscreen) {
-                        this.requestFullscreen();
-                    } else if (this.mozRequestFullScreen) {
-                        this.mozRequestFullScreen();
-                    } else if (this.webkitRequestFullscreen) {
-                        this.webkitRequestFullscreen();
-                    } else if (this.msRequestFullscreen) {
-                        this.msRequestFullscreen();
-                    }
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.mozCancelFullScreen) {
-                        document.mozCancelFullScreen();
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.msExitFullscreen) {
-                        document.msExitFullscreen();
-                    }
+            const nextWords = words.slice(currentIndex, currentIndex + wordCount).join(' ');
+            document.getElementById('currentText').value = nextWords;
+
+            responsiveVoice.speak(nextWords, voice, {
+                onend: () => {
+                    currentIndex += wordCount;
+                    summarizeText(); // Call text summarization after speaking
                 }
             });
         }
 
-        function preventScreenLockWithVideo() {
-            const video = document.getElementById('wakeLockVideo');
-
-            if (video) {
-                video.play().catch(error => {
-                    console.error('Ошибка при воспроизведении видео:', error);
-                });
-
-                // Попытка повторного воспроизведения в случае остановки
-                video.addEventListener('pause', () => {
-                    video.play().catch(error => {
-                        console.error('Ошибка при повторном воспроизведении видео:', error);
-                    });
-                });
-            }
+        function startCycle() {
+            speakNext(); // Speak first batch of words
+            summarizeText(); // Summarize the text
+            generate(); // Start generating images
         }
-
-        // Запускаем предотвращение блокировки экрана при загрузке страницы
-        window.addEventListener('load', preventScreenLockWithVideo);
     </script>
-    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-
-
 </head>
 <body>
-
-
-
-
-<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-   <h1>Book visualizer AI</h1>
-
-    <!-- Основной текст -->
-    <textarea id="textToSpeak" rows="10" placeholder="Введите текст для озвучки...">
-       
-    </textarea><br>
-
-    <!-- Поле для отображения текущих слов с переносом текста -->
+    <h1>Text Summarization, TTS, and Image Generation</h1>
+    <textarea id="textToSpeak" rows="10" placeholder="Enter text here..."></textarea><br>
     <textarea id="currentText" rows="5"></textarea><br>
 
-    <!-- Инпут для выбора количества слов -->
     <label for="wordCount">Number of words at a time:</label>
-    <input type="number" id="wordCount" min="1" value="50"><br><br>
+    <input type="number" id="wordCount" min="1" value="50"><br>
 
-    <!-- Выпадающий список для выбора голоса -->
-    <label for="voiceselection">Выберите голос:</label>
-    <select id="voiceselection" class="input input--dropdown js--animations">
+    <label for="voiceselection">Choose voice:</label>
+    <select id="voiceselection">
         <option value="Russian Female">Russian Female</option>
         <option value="Russian Male">Russian Male</option>
-        <option value="UK English Female">UK English Female</option>
-        <option value="UK English Male">UK English Male</option>
-        <option value="US English Female">US English Female</option>
-        <option value="US English Male">US English Male</option>
-        <option value="Polish Male">Polish Male</option>
-        <option value="Polish Female">Polish Female</option>
-        <option value="Romanian Female">Romanian Female</option>
-        <option value="Slovak Female">Slovak Female</option>
-        <option value="Ukrainian Female">Ukrainian Female</option>
-        <option value="Serbo-Croatian Male">Serbo-Croatian Male</option>
-        <option value="Bosnian Male">Bosnian Male</option>
-    </select><br><br>
+        <!-- Add more voices here -->
+    </select><br>
+
+    <button onclick="startCycle()">Start</button>
+    <div id="summaryText"></div><br>
 
     <div class="container">
         <div class="input-group">
@@ -245,88 +189,7 @@
         <button onclick="autoSetSize()">Auto size image</button>
     </div>
 
-    <button onclick="startSpeaking()">startSpeaking</button>
-
-    <!-- Поле для отображения сокращенного текста -->
-    <div id="summaryText">
-
-    </div>
-    <br>
-    <div class="input-group">
-        <label>Query</label>
-        <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
-    </div>
-
-    <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Full screen">
-<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-
-
-
-
-    <button onclick="summarizeText()">short</button>
-    <button onclick="generate()">generate</button>
-
-
-
-
-
-<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-    <div class="container">
-        <div class="input-group">
-            <label>Negative</label>
-            <input id="negative" type="text" value="">
-        </div>
-        <div class="input-group">
-            <label>Width</label>
-            <input id="width" type="text" value="1920" size="5">
-        </div>
-        <div class="input-group">
-            <label>Height</label>
-            <input id="height" type="text" value="1080" size="5">
-        </div>
-        <div class="input-group">
-            <label>Style</label>
-            <select id="style"></select>
-        </div>
-        <button onclick="autoSetSize()">Auto Size</button>
-        <button class="btn-generate" onclick="generate()">Start generate</button>
-    </div>
-
-    <video id="wakeLockVideo" loop playsinline muted style="display: none;">
-        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-    </video>
- <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-
-
-
-    
-
-    <script>
-        // Функция для отправки текста на API и получения сокращенного текста
-        async function summarizeText() {
-            const currentText = document.getElementById('currentText').value;
-            const summaryText = document.getElementById('summaryText');
-
-  
-            summaryText.value = '';
-
-            try {
-                const response = await fetch('/.netlify/functions/summarize', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ text: currentText })
-                });
-
-                const data = await response.json();
-                summaryText.innerHTML = data.summary;
-            } catch (error) {
-                console.error('Error:', error);
-                summaryText.innerHTML = `Error processing your request. Please try again later.`;
-            }
-
-        }
-    </script>
+    <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Click for fullscreen">
+    <button class="btn-generate" onclick="generate()">Generate Image</button>
 </body>
 </html>
