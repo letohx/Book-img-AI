@@ -59,7 +59,7 @@
                 num_images: 1,
                 negativePromptUnclip: negative.value,
                 generateParams: {
-                    query: query.value,
+                    summaryText: summaryText.value,
                 }
             }
         }
@@ -249,8 +249,8 @@
 
     <!-- Поле для отображения сокращенного текста -->
     <div class="input-group">
-        <label>summarizeText</label>
-        <input id="query" type="text" value="контейнеровоз терпит крушение в шторм">
+        <label>summaryText</label>
+        <input id="summaryText" type="text" value="контейнеровоз терпит крушение в шторм">
     </div>
 
     <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Full screen">
