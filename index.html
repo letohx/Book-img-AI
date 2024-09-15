@@ -5,30 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book img AI</title>
     <style>
-       body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        textarea {
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f5;
+            display: flex;
+            justify-content: center;
+        }
+
+        .wrapper {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
             width: 100%;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #2c3e50;
             margin-bottom: 20px;
         }
-        label {
-            display: block;
-            margin-top: 10px;
+
+        textarea, select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
         }
+
         button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
             color: white;
             border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .input-group {
+            margin-bottom: 20px;
         }
+
+        label {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .size-img {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
     </style>
     <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
     <script>
@@ -207,50 +262,54 @@
     </script>
 </head>
 <body>
-    <h1>Book image AI</h1>
-    <textarea id="textToSpeak" rows="10" placeholder="Enter text here..."></textarea><br>
-    <textarea id="currentText" rows="5" readonly></textarea><br>
-
-    <label for="wordCount">Number of words at a time:</label>
-    <input type="number" id="wordCount" min="1" value="50"><br>
-
-    <label for="voiceselection">Choose voice:</label>
-    <select id="voiceselection">
-        <option value="Russian Female">Russian Female</option>
-        <option value="Russian Male">Russian Male</option>
-        <option value="UK English Female">UK English Female</option>
-        <option value="UK English Male">UK English Male</option>
-        <option value="US English Female">US English Female</option>
-        <option value="US English Male">US English Male</option>
-        <option value="Polish Male">Polish Male</option>
-        <option value="Polish Female">Polish Female</option>
-        <option value="Romanian Female">Romanian Female</option>
-        <option value="Slovak Female">Slovak Female</option>
-        <option value="Ukrainian Female">Ukrainian Female</option>
-        <option value="Serbo-Croatian Male">Serbo-Croatian Male</option>
-        <option value="Bosnian Male">Bosnian Male</option>
-    </select><br>
-
-    <div class="container">
+    <div class="wrapper">
+        <h1>Book Image AI</h1>
         <div class="input-group">
-            <label>Width</label>
-            <input id="width" type="text" value="1920" size="5">
+            <textarea id="textToSpeak" rows="8" placeholder="Enter text here..."></textarea>
+            <textarea id="currentText" rows="5" readonly></textarea>
+
+            <label for="wordCount">Number of words at a time:</label>
+            <input type="number" id="wordCount" min="1" value="50">
+
+            <label for="voiceselection">Choose voice:</label>
+            <select id="voiceselection">
+                <option value="Russian Female">Russian Female</option>
+                <option value="Russian Male">Russian Male</option>
+                <option value="UK English Female">UK English Female</option>
+                <option value="UK English Male">UK English Male</option>
+                <option value="US English Female">US English Female</option>
+                <option value="US English Male">US English Male</option>
+                <option value="Polish Male">Polish Male</option>
+                <option value="Polish Female">Polish Female</option>
+                <option value="Romanian Female">Romanian Female</option>
+                <option value="Slovak Female">Slovak Female</option>
+                <option value="Ukrainian Female">Ukrainian Female</option>
+                <option value="Serbo-Croatian Male">Serbo-Croatian Male</option>
+                <option value="Bosnian Male">Bosnian Male</option>
+            </select>
+
+            <div class="size-img">
+                <div class="input-group">
+                    <label>Width</label>
+                    <input id="width" type="number" value="1920" size="5">
+                </div>
+    
+                <div class="input-group">
+                    <label>Height</label>
+                    <input id="height" type="number" value="1080" size="5">
+                </div>
+            </div>
+
+            <button onclick="autoSetSize()">Auto size image</button>
+            <div class="input-group">
+                <label>Style image</label>
+                <select id="style"></select>
+            </div>
+
+            <button onclick="startCycle()">Start</button>
         </div>
-        <div class="input-group">
-            <label>Height</label>
-            <input id="height" type="text" value="1080" size="5">
-        </div>
-        <button onclick="autoSetSize()">Auto size image</button>
-        <div class="input-group">
-            <label>Style</label>
-            <select id="style"></select>
-        </div>
+
+        <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Generated image">
     </div>
-
-    <button onclick="startCycle()">Start</button>
-
-    <div id="summaryText"></div><br>
-
-    <img src="https://www.research.autodesk.com/app/uploads/2023/01/ai.jpg" id="img" title="Click for fullscreen">
 </body>
 </html>
